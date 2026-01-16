@@ -7,6 +7,17 @@
 *   **Auth**: JWT (RS256) in `Authorization` header.
 *   **Rate Limit**: 基於 Redis Token Bucket (X-RateLimit-Limit).
 
+## 1.1.1 版本控管與相容性 (Versioning & Compatibility)
+*   **REST**: 以 `/api/v1` 做主版號，minor 變更需保持向後相容，breaking change 必須升版 (`/api/v2`)。
+*   **Deprecation**: 新舊版平行運行至少 6 個月，並提前 90 天公告停用時程。
+*   **gRPC**: 僅新增 optional 欄位，不重用欄位編號；破壞性變更以新 package/version 發佈。
+*   **Events**: 使用 Schema Registry 管控 `event_version`，僅允許 backward compatible 變更。
+
+## 1.1.2 FHIR 版本鎖定與 Conformance
+*   **FHIR Baseline**: 固定 FHIR R4.0.1 + TW Core IG (snapshot: 2026-01-16) 作為規格凍結基準。
+*   **Conformance Artifacts**: 發佈 CapabilityStatement、StructureDefinition、ValueSet 供 HIS 端對接與驗證。
+*   **升級策略**: 新版本以 migration window 推出，並提供 diff/validation 報告。
+
 ---
 
 ## 1.2 Public REST API (For Provider App / Admin Web)

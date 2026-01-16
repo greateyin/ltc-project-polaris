@@ -75,6 +75,7 @@
 
 *   **性質**: Inbound (接收轉介).
 *   **標準**: FHIR R4 TW Core IG.
+*   **FHIR Version**: R4.0.1 + TW Core IG (snapshot: 2026-01-16); 必須提供 CapabilityStatement 供對接驗證。
 
 ### 1. 提交 Bundle (交易模式)
 *   **Method**: `POST`

@@ -92,3 +92,15 @@ graph TD
 ### K8s Pod Design
 *   **Auto-Scaling**: 設定 HPA (Horizontal Pod Autoscaler)，依據 CPU/Memory 及 Kafka Lag 進行擴縮。
 *   **Sidecar Pattern**: 每個 Service Pod 皆注入 **Istio Proxy** 進行 mTLS 加密與 Traffic Observability。
+
+---
+
+## 1.5 事件契約與版本策略 (Event Contract & Versioning)
+
+為確保跨服務演進可控，事件遵循嚴格的契約與相容性規範。
+
+*   **Event Envelope**: 所有事件使用統一欄位 `event_type`, `event_version`, `occurred_at`, `correlation_id`, `payload`。
+*   **Schema Registry**: Kafka Topic 需註冊 schema，並採 **backward compatible** 規則。
+*   **Replay & Idempotency**: 消費者必須設計為可重放 (idempotent)；事件處理需有去重鍵。
+*   **Outbox Pattern**: 服務寫入 DB 與發送事件採用 Outbox，避免雙寫不一致。
+*   **Saga Boundary**: 事件發佈與補償交易的邊界需明確標註於 Workflow 定義中。

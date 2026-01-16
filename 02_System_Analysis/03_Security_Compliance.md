@@ -65,3 +65,24 @@
 }
 ```
 *   **WORM Storage**: 日誌即時串流至 S3 Object Lock (Compliance Mode) 儲存桶，防止刪除或竄改。
+
+---
+
+## 3.4 資料主權與同意管理 (Data Sovereignty & Consent)
+
+*   **Residency**: PII 與醫療資料必須儲存在政府雲/機房，跨境存取需經授權與去識別化。
+*   **Consent Record**: 個案同意需以可稽核方式保存 (含同意範圍、有效期限、撤回紀錄)。
+*   **Minimization**: API 回傳採最小必要原則，避免不必要欄位外洩。
+*   **Deletion/Revocation**: 同意撤回後，停止二次利用並啟動資料封存或刪除流程。
+
+## 3.5 災難復原與營運持續 (DR/BCP)
+
+*   **RPO/RTO**: 核心系統 RPO <= 15 分鐘，RTO <= 2 小時。
+*   **Backup**: DB 每日全量、每 15 分鐘增量，備份加密並存放異地。
+*   **Failover**: 需支援跨區域故障切換與演練 (至少每半年一次)。
+
+## 3.6 事件通報與應變 (Incident Response)
+
+*   **Detection**: SIEM 監控與異常行為偵測 (含 API 失敗率、異常存取)。
+*   **Response**: 依資安等級分級通報，重大事件需於 72 小時內完成初步通報。
+*   **Forensics**: 保存關鍵日誌與關聯 ID，支援事後鑑識與責任追溯。

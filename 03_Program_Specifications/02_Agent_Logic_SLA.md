@@ -115,3 +115,11 @@ func (e *Engine) CheckRule(ctx context.Context, claim ClaimRequest) (Result, err
     return Result{Eligible: true, Subsidy: grant, SelfPay: claim.Cost - grant}, nil
 }
 ```
+
+## 2.4 模型治理與可解釋性 (Model Governance)
+
+*   **Model Registry**: 所有 NLP/語意模型需註冊版本、訓練資料來源與發布日期。
+*   **Quality Gates**: 上線前需通過效能 (F1/Recall)、偏差檢測與安全測試。
+*   **Explainability**: 媒合與風險標記需回傳可解釋原因 (例如：距離、技能缺口、風險因子)。
+*   **Human Override**: 人工確認可覆寫模型輸出，並保留覆寫原因供稽核。
+*   **Drift Monitoring**: 監控模型漂移與召回率下降，必要時啟動回滾。
