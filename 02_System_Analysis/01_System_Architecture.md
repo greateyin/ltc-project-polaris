@@ -25,50 +25,50 @@ MAS 架構的目標是將「高壓、跨部門、時序長」的長照流程拆�
 ```mermaid
 graph TD
     subgraph "External Channels (通路層)"
-        Web_Admin[Admin Console (React)]
-        App_Prov[Provider App (Flutter)]
-        Bot_Line[Line Webhook Server]
+        Web_Admin["Admin Console (React)"]
+        App_Prov["Provider App (Flutter)"]
+        Bot_Line["Line Webhook Server"]
     end
 
     subgraph "API Gateway Layer (Kong)"
-        Auth_Svc[Auth Service (OIDC/OAuth2)]
-        Rate_Limit[Rate Limiter (Redis)]
+        Auth_Svc["Auth Service (OIDC/OAuth2)"]
+        Rate_Limit["Rate Limiter (Redis)"]
     end
 
     subgraph "Orchestration Layer (協調層)"
-        Workflow_Engine[Temporal.io Server]
-        Event_Bus[Apache Kafka]
+        Workflow_Engine["Temporal.io Server"]
+        Event_Bus["Apache Kafka"]
     end
 
     subgraph "Agent Service Layer (代理服務層)"
         direction TB
-        Ag_Demand[Demand Agent (Python/FastAPI)\n- NLP: Clinical Note Parsing\n- Rule: CMS Level Est.]
-        Ag_Match[Matching Agent (Python/FastAPI)\n- Algo: Weighted Scoring\n- GIS: Routing Engine]
-        Ag_Resource[Resource Agent (Go)\n- Logic: Subsidy Calc\n- Logic: Inventory Check]
-        Ag_Notify[Notification Agent (Node.js)\n- Channel: Line/SMS/Email]
-        Ag_SLA[SLA Monitor Agent (Go)\n- Func: Time-Series Tracking]
+        Ag_Demand["Demand Agent (Python/FastAPI)\n- NLP: Clinical Note Parsing\n- Rule: CMS Level Est."]
+        Ag_Match["Matching Agent (Python/FastAPI)\n- Algo: Weighted Scoring\n- GIS: Routing Engine"]
+        Ag_Resource["Resource Agent (Go)\n- Logic: Subsidy Calc\n- Logic: Inventory Check"]
+        Ag_Notify["Notification Agent (Node.js)\n- Channel: Line/SMS/Email"]
+        Ag_SLA["SLA Monitor Agent (Go)\n- Func: Time-Series Tracking"]
     end
 
     subgraph "Data Persistence Layer (資料層)"
-        DB_Core[(PostgreSQL 16 - Sharded)\n- Cases, Orders, Audit]
-        DB_Vector[(Qdrant)\n- Provider Profiles (Embeddings)]
-        Cache[(Redis Cluster)\n- Session, Hot Inventory]
-        Obj_Store[(MinIO/S3)\n- Medical Images, Signatures]
+        DB_Core[("PostgreSQL 16 - Sharded\n- Cases, Orders, Audit")]
+        DB_Vector[("Qdrant\n- Provider Profiles (Embeddings)")]
+        Cache[("Redis Cluster\n- Session, Hot Inventory")]
+        Obj_Store[("MinIO/S3\n- Medical Images, Signatures")]
     end
 
-    Web_Admin --> API_Gateway
-    App_Prov --> API_Gateway
-    Bot_Line --> API_Gateway
-    
-    API_Gateway --> Workflow_Engine
+    Web_Admin --> Auth_Svc
+    App_Prov --> Auth_Svc
+    Bot_Line --> Auth_Svc
+
+    Auth_Svc --> Workflow_Engine
     Workflow_Engine --> Event_Bus
-    
+
     Event_Bus --> Ag_Demand
     Event_Bus --> Ag_Match
     Event_Bus --> Ag_Resource
     Event_Bus --> Ag_Notify
     Event_Bus --> Ag_SLA
-    
+
     Ag_Demand --> DB_Core
     Ag_Match --> DB_Vector
     Ag_Resource --> DB_Core
