@@ -17,11 +17,13 @@
 2.  **[資料庫綱要設計](02_System_Analysis/02_Database_Schema.md)**
     *   實體關係圖 (ERD) - High Detail
     *   實體規格 (Entity Specs): Partitioning & Indexing
+    *   指標資料表 (Coverage Gap / Workforce Load)
     *   Redis 快取策略
 
 3.  **[安全性與合規設計](02_System_Analysis/03_Security_Compliance.md)**
     *   零信任架構 (Zero Trust)
     *   資料加密 (KMS & Column-Level)
+    *   公平與可近性合規 (Equity & Accessibility)
     *   FHIR TW Core 合規驗證
 
 4.  **[關鍵流程時序圖](02_System_Analysis/04_Sequence_Diagrams.md)**

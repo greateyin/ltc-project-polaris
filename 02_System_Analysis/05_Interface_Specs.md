@@ -46,6 +46,7 @@
 *   **性質**: Outbound (單向申報).
 *   **連線方式**: https over Internet.
 *   **認證**: 雙向 TLS (mTLS) + 權杖.
+*   **公平性欄位**: 申報資料需可攜帶地區碼 (region_code) 與服務等待天數 (wait_days) 以支援政策監測.
 
 ### 1. 批次上傳申報檔 (Batch Upload)
 *   **Method**: `POST`

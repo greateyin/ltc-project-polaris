@@ -71,6 +71,43 @@ CREATE TABLE core.match_requests (
 CREATE INDEX idx_match_geo ON core.match_requests USING GIST (target_geo);
 ```
 
+#### Table: `metrics_coverage_gap` (覆蓋率與等待時間)
+用於政策 KPI 追蹤，避免區域資源缺口。
+
+```sql
+CREATE TABLE analytics.metrics_coverage_gap (
+    period_month      DATE NOT NULL,
+    region_code       VARCHAR(10) NOT NULL, -- 縣市/鄉鎮
+    eligible_count    INT NOT NULL,
+    served_count      INT NOT NULL,
+    coverage_rate     DECIMAL(5,2) NOT NULL, -- served/eligible
+    avg_wait_days     DECIMAL(6,2) NOT NULL,
+    p90_wait_days     DECIMAL(6,2) NOT NULL,
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (period_month, region_code)
+);
+```
+
+#### Table: `metrics_workforce_load` (人力負荷)
+追蹤個管/照專平均案量與超載比例。
+
+```sql
+CREATE TABLE analytics.metrics_workforce_load (
+    period_month      DATE NOT NULL,
+    region_code       VARCHAR(10) NOT NULL,
+    staff_type        VARCHAR(20) NOT NULL, -- CARE_MANAGER, SUPERVISOR
+    active_cases      INT NOT NULL,
+    staff_count       INT NOT NULL,
+    avg_cases_per_staff DECIMAL(6,2) NOT NULL,
+    overload_ratio    DECIMAL(5,2) NOT NULL, -- 超過警戒值比例
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (period_month, region_code, staff_type)
+);
+```
+
+**來源說明**:
+*   指標由事件流 (Kafka) 與 CMS 統計匯入，採月彙整並保留歷史快照。
+
 ---
 
 ## 2.3 Redis 快取設計 (Cache Strategy)

@@ -10,7 +10,7 @@
 ## 📄 章節列表
 
 1.  **[簡介與願景](01_Product_Requirements/01_Introduction.md)**
-    *   政策背景 (長照 3.0、智慧租賃補助)
+    *   政策背景與結構性痛點 (人口結構、人力缺口、服務斷點)
     *   商業目標 (Business Goals)
     *   關鍵成功指標 (Success Metrics)
 
@@ -29,10 +29,12 @@
 5.  **[非功能性需求](01_Product_Requirements/04_Non_Functional_Requirements.md)**
     *   資安標準 (ISO 27001, AES-256)
     *   FHIR TW Core 合規性
+    *   公平與可近性指標 (Coverage Gap / Regional SLA)
 
 6.  **[推動路徑與 KPI](01_Product_Requirements/05_Roadmap_KPI.md)**
     *   MVP 範疇 (2026 Q1)
     *   全國推廣計畫 (2026 Q3)
+    *   公平/人力監測指標 (Coverage Gap, Workforce Load)
 
 7.  **[商業邏輯規則](01_Product_Requirements/07_Business_Logic.md)** (New)
     *   補助計算公式

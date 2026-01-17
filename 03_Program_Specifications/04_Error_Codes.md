@@ -36,11 +36,17 @@
 | `E-402-001` | Insufficient Subsidy Quota | 額度試算餘額不足 | 提示改為自費或更換項目 |
 | `E-402-002` | Exclusion Rule Violation | 已有購置紀錄，不可租賃同類產品 | 拒絕交易 |
 
+### 409 Conflict (Data Integrity)
+| Code | Message | Scenario | Action |
+| :--- | :--- | :--- | :--- |
+| `E-409-001` | Metrics Duplicate | 同期指標重複上傳 | Reject duplicate |
+
 ### 500 System Errors
 | Code | Message | Scenario | Actions |
 | :--- | :--- | :--- | :--- |
 | `E-500-001` | Matching Engine Timeout | GIS 計算超時 | Retry with exponential backoff |
 | `E-500-002` | Upstream CMS Unavailable | 衛福部 API 連線失敗 | Queue request for later retry |
+| `E-500-003` | Metrics Ingest Failure | 指標批次入庫失敗 | Queue for retry |
 
 ## 4.3 重試策略 (Retry Policy)
 

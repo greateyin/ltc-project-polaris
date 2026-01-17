@@ -46,3 +46,5 @@
     *   來源: https://www.cambridge.org/core/journals/ageing-and-society/article/abs/longterm-care-system-in-taiwan-the-2017-major-reform-and-its-challenges/BBFFA7C6F73A3EBE2771C1FDA55589B2
 *   **Service integration challenges**
     *   來源: https://pmc.ncbi.nlm.nih.gov/articles/PMC6555737/
+*   **Workforce retention and emotional labor**
+    *   來源: https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2025.1545955/full

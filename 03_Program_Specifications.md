@@ -11,16 +11,17 @@
 
 1.  **[API 介面規格](03_Program_Specifications/01_API_Specifications.md)**
     *   Public REST API (Mobile/Web)
-    *   External Webhook (Line/SMS)
+    *   Admin Metrics API (Coverage Gap / Workforce Load)
     *   Internal gRPC (Microservices Inter-com)
 
 2.  **[核心邏輯與演算法](03_Program_Specifications/02_Agent_Logic_SLA.md)**
     *   Temporal Workflow 定義 (出院轉介 Saga)
     *   智慧媒合演算法實作 (Weighted Scoring)
     *   補助額度計算引擎 (Rule Engine)
+    *   公平/人力監測邏輯 (Equity & Workforce Monitoring)
 
 3.  **[資料字典與常數](03_Program_Specifications/03_Data_Dictionary.md)**
-    *   Global Enums (Service Types, CMS Levels)
+    *   Global Enums (Service Types, CMS Levels, Metric Types)
     *   Database Mapping (ORM Models)
     *   FHIR Profile Mapping
 

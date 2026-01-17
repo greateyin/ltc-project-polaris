@@ -6,6 +6,7 @@
     *   Internal (Agent-to-Agent) -> **gRPC (Protobuf)**
 *   **Auth**: JWT (RS256) in `Authorization` header.
 *   **Rate Limit**: 基於 Redis Token Bucket (X-RateLimit-Limit).
+*   **Region Context**: 涉及公平性監測的 API 必須帶 `region_code` (或能由個案/機構推導)。
 
 ## 1.1.1 版本控管與相容性 (Versioning & Compatibility)
 *   **REST**: 以 `/api/v1` 做主版號，minor 變更需保持向後相容，breaking change 必須升版 (`/api/v2`)。
@@ -23,6 +24,51 @@
 ## 1.2 Public REST API (For Provider App / Admin Web)
 
 ### 1.2.1 接案管理 (Provider Operations)
+
+#### `GET /api/v1/admin/metrics/coverage-gap`
+查詢各縣市/鄉鎮覆蓋率與等待時間指標，用於公平性監測。
+
+*   **Query Params**:
+    *   `period`: 月份 (YYYY-MM)
+    *   `region_code`: 縣市/鄉鎮代碼 (Optional)
+*   **Response (200 OK)**:
+    ```json
+    {
+      "items": [
+        {
+          "period": "2026-06",
+          "region_code": "TPE",
+          "coverage_rate": 0.82,
+          "avg_wait_days": 3.4,
+          "p90_wait_days": 7.2
+        }
+      ],
+      "meta": { "total": 1, "page": 1 }
+    }
+    ```
+
+#### `GET /api/v1/admin/metrics/workforce-load`
+查詢個管/照專人力負荷與超載比例，用於人力壓力監測。
+
+*   **Query Params**:
+    *   `period`: 月份 (YYYY-MM)
+    *   `region_code`: 縣市/鄉鎮代碼 (Optional)
+    *   `staff_type`: `CARE_MANAGER` | `SUPERVISOR`
+*   **Response (200 OK)**:
+    ```json
+    {
+      "items": [
+        {
+          "period": "2026-06",
+          "region_code": "TPE",
+          "staff_type": "CARE_MANAGER",
+          "avg_cases_per_staff": 128.5,
+          "overload_ratio": 0.23
+        }
+      ],
+      "meta": { "total": 1, "page": 1 }
+    }
+    ```
 
 #### `GET /api/v1/provider/orders/available`
 獲取當前可接案的列表 (基於 Geo-Fencing 與資格過濾)。
@@ -57,6 +103,42 @@
     *   `409 Conflict`: 訂單已被搶走。
 
 ### 1.2.2 輔具庫存管理 (Device Inventory)
+
+#### `POST /api/v1/admin/metrics/coverage-gap/ingest`
+匯入月度覆蓋率與等待時間指標 (由 CMS 統計或事件流彙整)。
+
+*   **Payload**:
+    ```json
+    {
+      "period": "2026-06",
+      "region_code": "TPE",
+      "eligible_count": 120000,
+      "served_count": 98400,
+      "coverage_rate": 0.82,
+      "avg_wait_days": 3.4,
+      "p90_wait_days": 7.2
+    }
+    ```
+*   **Response**:
+    *   `202 Accepted`: 已接收，進入批次校驗與入庫。
+
+#### `POST /api/v1/admin/metrics/workforce-load/ingest`
+匯入月度人力負荷指標。
+
+*   **Payload**:
+    ```json
+    {
+      "period": "2026-06",
+      "region_code": "TPE",
+      "staff_type": "CARE_MANAGER",
+      "active_cases": 15420,
+      "staff_count": 120,
+      "avg_cases_per_staff": 128.5,
+      "overload_ratio": 0.23
+    }
+    ```
+*   **Response**:
+    *   `202 Accepted`: 已接收，進入批次校驗與入庫。
 
 #### `POST /api/v1/provider/inventory/sync`
 同步輔具庫存狀態 (供系統做媒合判斷)。

@@ -27,11 +27,18 @@ export async function dischargeReferralSaga(bundle: FhirBundle): Promise<void> {
     // Step 4: 等待接單 (Human signal)
     // 設定 48 小時 SLA Timer
     const accepted = await condition(() => isAssigned(caseId), '48h');
-    
+
     if (!accepted) {
       // SLA Breach: 升級為急件，通知人工介入
       await activities.escalateToSupervisor(caseId);
     }
+
+    // Step 5: 公平性指標更新 (Coverage/Wait)
+    await activities.emitCoverageMetrics({
+      caseId,
+      regionCode: assessment.regionCode,
+      waitDays: calcWaitDays(caseId)
+    });
 
   } catch (err) {
     // 執行補償交易 (Compensating Transactions)
@@ -123,3 +130,8 @@ func (e *Engine) CheckRule(ctx context.Context, claim ClaimRequest) (Result, err
 *   **Explainability**: 媒合與風險標記需回傳可解釋原因 (例如：距離、技能缺口、風險因子)。
 *   **Human Override**: 人工確認可覆寫模型輸出，並保留覆寫原因供稽核。
 *   **Drift Monitoring**: 監控模型漂移與召回率下降，必要時啟動回滾。
+
+## 2.5 公平性與人力監測 (Equity & Workforce Monitoring)
+*   **Coverage Gap**: 依 `region_code` 計算覆蓋率與等待時間，並寫入監測表。
+*   **Workforce Load**: 監控個管/照專平均案量與超載比例，異常時通知衛生局。
+*   **Signals**: 由事件流或 CMS 統計匯入，採月彙整並保留快照。

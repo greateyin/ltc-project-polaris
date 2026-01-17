@@ -49,6 +49,9 @@ sequenceDiagram
 
     Orch->>Line: Push Notification (To Family)
     Line-->>HIS: 201 Created (Case ID)
+
+    Note over Orch, Ag_M: Equity Metric Update
+    Orch->>DB: Update metrics_coverage_gap (region, wait_days)
 ```
 
 ---

@@ -20,6 +20,12 @@
 | `DA` | 日間照顧 | `https://pre-code.gov.tw/CodeSystem/LTC-Service-Type#DA` |
 | `EF_R` | 輔具租賃 | `https://pre-code.gov.tw/CodeSystem/LTC-Service-Type#EF-R` |
 
+### `MetricType`
+| Code | Description |
+| :--- | :--- |
+| `COVERAGE_GAP` | 覆蓋率與等待時間指標 |
+| `WORKFORCE_LOAD` | 人力負荷指標 |
+
 ## 3.2 資料庫對映 (DB Mapping)
 
 ### Model: `ServiceOrder` (服務單)
@@ -30,6 +36,7 @@ model ServiceOrder {
   id              String   @id @default(uuid())
   caseId          String   // FK to Case
   providerId      String?  // FK to Provider
+  regionCode      String?  // 縣市/鄉鎮代碼 (公平性監測)
   
   status          OrderStatus @default(PENDING)
   
@@ -55,6 +62,41 @@ model ServiceOrder {
   @@index([caseId])
   @@index([providerId, status])
   @@index([scheduledDate]) // For Scheduler Query
+  @@index([regionCode])
+}
+```
+
+### Model: `CoverageMetric` (公平性指標)
+
+```typescript
+model CoverageMetric {
+  periodMonth     DateTime
+  regionCode      String
+  eligibleCount   Int
+  servedCount     Int
+  coverageRate    Decimal
+  avgWaitDays     Decimal
+  p90WaitDays     Decimal
+  createdAt       DateTime @default(now())
+
+  @@id([periodMonth, regionCode])
+}
+```
+
+### Model: `WorkforceMetric` (人力負荷指標)
+
+```typescript
+model WorkforceMetric {
+  periodMonth       DateTime
+  regionCode        String
+  staffType         String // CARE_MANAGER, SUPERVISOR
+  activeCases       Int
+  staffCount        Int
+  avgCasesPerStaff  Decimal
+  overloadRatio     Decimal
+  createdAt         DateTime @default(now())
+
+  @@id([periodMonth, regionCode, staffType])
 }
 ```
 

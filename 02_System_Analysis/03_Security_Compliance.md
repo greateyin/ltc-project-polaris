@@ -75,6 +75,11 @@
 *   **Minimization**: API 回傳採最小必要原則，避免不必要欄位外洩。
 *   **Deletion/Revocation**: 同意撤回後，停止二次利用並啟動資料封存或刪除流程。
 
+## 3.4A 公平與可近性合規 (Equity & Accessibility Controls)
+*   **Coverage Monitoring**: 依縣市/鄉鎮追蹤覆蓋率與等待時間，做為政策監督與資源補強依據。
+*   **Low-Digital Access**: 家屬與長輩可透過 LINE/語音查詢，不以 App 作為唯一通路。
+*   **SLA Parity**: 偏鄉與高缺口區域需定義差別化 SLA，避免平均值掩蓋落差。
+
 ## 3.5 災難復原與營運持續 (DR/BCP)
 
 *   **RPO/RTO**: 核心系統 RPO <= 15 分鐘，RTO <= 2 小時。
