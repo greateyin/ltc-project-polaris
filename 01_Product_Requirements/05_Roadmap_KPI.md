@@ -35,4 +35,6 @@
 | **體驗** | **Match Rate** | 首次媒合成功率 (無需人工換人) | > 70% | > 85% | Match Agent |
 | **重症** | **Severe Cov** | CMS 7-8 級案件媒合成功率 | > 80% | > 95% | Match Agent |
 | **租賃** | **Rental Utl** | 出院個案使用租賃輔具之比率 | N/A | > 20% | Resource Agent |
+| **公平** | **Coverage Gap** | 高缺口縣市之服務覆蓋率差距 | Baseline | -20% Gap | 政策報表 |
+| **人力** | **Workforce Load** | 個管/照專平均案量與警戒比例 | Baseline | -15% 超載 | 人力統計 |
 | **系統** | **Uptime** | 系統正常運作時間 | 99.5% | 99.9% | Monitoring |

@@ -31,3 +31,8 @@
 *   **Immutable**: 稽核日誌須寫入 WORM (Write Once Read Many) 儲存體.
 *   **Retention**: 醫療相關紀錄保留至少 **7 年** (醫療法規); 財務核銷紀錄保留 **10 年** (會計法規).
 *   **Content**: 紀錄必須包含 `UserIP`, `Timestamp (UTC)`, `ResourceID`, `Action`, `UserAgent`.
+
+### 4.3.3 公平與可近性 (Equity & Accessibility)
+*   **Coverage Gap Monitoring**: 系統需追蹤縣市覆蓋率差距與等待時間，避免資源集中導致服務斷點。
+*   **Info Accessibility**: 需提供低數位門檻管道 (LINE、語音) 讓家庭照顧者可查詢進度與權益。
+*   **Regional SLA**: 偏鄉或高缺口地區應納入差別化 SLA 與資源補強指標。

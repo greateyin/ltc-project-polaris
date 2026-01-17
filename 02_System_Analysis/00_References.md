@@ -30,3 +30,19 @@
     *   重點: A.12.3 (加密), A.12.4 (日誌紀錄).
 *   **NIST SP 800-207**: 零信任架構 (Zero Trust Architecture) 指引。
     *   Source: [NIST ZTA](https://csrc.nist.gov/publications/detail/sp/800-207/final)
+
+## 5. 長照政策與統計 (Policy & Stats)
+*   **國發會人口推估 (2024-2070)**
+    *   來源: https://www.ndc.gov.tw/nc_27_38548
+*   **衛福部長照統計年報 (113 年) - Page 71**
+    *   來源: https://service.mohw.gov.tw/ebook/dopl/113/01/files/basic-html/page71.html
+*   **衛福部長照統計資料列表**
+    *   來源: https://1966.gov.tw/LTC/lp-6485-207.html
+
+## 6. 研究證據 (Research Evidence)
+*   **Coverage gaps & resource shortage (Dynamic DEA)**
+    *   來源: https://www.mdpi.com/1660-4601/18/2/605
+*   **Governance and integration challenges**
+    *   來源: https://www.cambridge.org/core/journals/ageing-and-society/article/abs/longterm-care-system-in-taiwan-the-2017-major-reform-and-its-challenges/BBFFA7C6F73A3EBE2771C1FDA55589B2
+*   **Service integration challenges**
+    *   來源: https://pmc.ncbi.nlm.nih.gov/articles/PMC6555737/

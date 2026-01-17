@@ -4,6 +4,15 @@
 
 本系統採用 **Event-Driven Microservices (事件驅動微服務)** 架構，並結合 **Multi-Agent Systems (MAS)** 模式來處理複雜的長照資源協商邏輯。
 
+### 問題導向設計 (Problem-Driven Design)
+系統設計對應長照現場的主要結構性痛點：
+*   **高齡人口快速成長**：2025 年進入超高齡社會，需求持續上升。[國發會人口推估](https://www.ndc.gov.tw/nc_27_38548)
+*   **服務擴張與供給壓力**：112 年長照服務人數 505,020 人，特約單位 8,858 處，規模成長但品質與量能壓力上升。[衛福年報(113) Page 71](https://service.mohw.gov.tw/ebook/dopl/113/01/files/basic-html/page71.html)
+*   **人力與區域缺口**：人力短缺與縣市覆蓋落差導致服務不連續。[IJERPH 2021](https://www.mdpi.com/1660-4601/18/2/605)
+*   **醫照整合斷點**：醫療與長照治理、資訊系統仍難以銜接。[Ageing & Society 2020](https://www.cambridge.org/core/journals/ageing-and-society/article/abs/longterm-care-system-in-taiwan-the-2017-major-reform-and-its-challenges/BBFFA7C6F73A3EBE2771C1FDA55589B2)
+
+MAS 架構的目標是將「高壓、跨部門、時序長」的長照流程拆解為可監控、可重試、可量化的協作單元，以對應上述痛點。
+
 ### 核心設計原則
 1.  **鬆散耦合 (Loose Coupling)**: 各 Agent 透過 **Event Bus (Kafka)** 進行非同步溝通，避免單一服務故障導致全系統癱瘓。
 2.  **最終一致性 (Eventual Consistency)**: 針對跨系統的狀態同步 (如：HIS 轉介單 status vs. CMS 審核 status)，採用 **Saga Pattern (Orchestration-based)** 確保資料一致。

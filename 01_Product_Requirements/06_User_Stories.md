@@ -41,6 +41,14 @@
 
 ## 6.3 追蹤與回饋 (Tracking & Feedback)
 
+**Story 4.5: 資源公平與等待時間透明 (Equity Transparency)**
+*   **As a** 衛生局承辦人
+*   **I want to** 系統提供各縣市的等待時間、覆蓋率與人力負荷指標
+*   **So that** 我能及早識別高缺口區域並啟動補強資源。
+*   **Acceptance Criteria**:
+    *   儀表板顯示 Coverage Gap 與等待時間分布。
+    *   可依縣市/鄉鎮切換。
+
 **Story 5: 物流式進度追蹤 (Logistic-style Tracking)**
 *   **As a** 家庭照顧者
 *   **I want to** 在 LINE 上收到通知，顯示「輔具廠商已出發，預計 14:00 抵達」，以及「居服員 王小明 將於明日 09:00 第一次與您見面」

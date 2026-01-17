@@ -2,6 +2,11 @@
 
 ## 3.1 需求與評估 Agent (Demand & Assessment Agent)
 
+### 問題對應 (Pain Points Mapping)
+*   **轉介黑洞** -> `FR-DA-01` 自動解析與資料拋轉，減少重複登打。
+*   **資訊落差** -> `FR-DA-02` 48 小時 SLA，確保案件不被遺漏。
+*   **高風險案件漏接** -> 風險標記與等級推估作為優先處理依據。
+
 ### FR-DA-01: 智慧出院摘要解析 (Intelligent Discharge Parsing)
 *   **Trigger**: 接收到 HIS 傳來的 `FHIR Bundle (DocumentType)`。
 *   **Input**:
