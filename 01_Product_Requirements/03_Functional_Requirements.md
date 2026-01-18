@@ -69,3 +69,42 @@
     *   推播 Line Message 給家屬: "今日服務已完成 (沐浴, 備餐)，請確認".
     *   家屬點擊連結 -> 瀏覽服務照片 -> 手指簽名.
 *   **Output**: 產生數位簽名檔, 存入 `ServiceRecord` 作為核銷憑證.
+
+## 3.5 例外處理與升級 Agent (Exception & Escalation Agent)
+
+### FR-EE-01: 改期/取消事件編排 (Reschedule/Cancel Orchestration)
+*   **Trigger**: 收到 `RESCHEDULE_REQUEST` 或 `CANCEL_REQUEST`。
+*   **Input**:
+    *   `ServiceOrderID`, `RequesterRole` (FAM/CM/PROV), `ReasonCode`.
+*   **Process (Logic)**:
+    1.  檢查距離服務開始時間的剩餘時間 (e.g., >24h, 24h-2h, <2h).
+    2.  若為改期：生成 3 個候選時段 (基於 B 單位可用性)；若不足則標記 `NEED_HUMAN_ASSIST`。
+    3.  產生事件並通知相關角色：家屬、A 單位個管師、B 單位督導。
+*   **Output**:
+    *   `ServiceOrder` 狀態更新: `RESCHEDULE_PENDING` / `CANCELLED`。
+
+### FR-EE-02: 爽約與安全事件通報 (No-show & Safety Incident Reporting)
+*   **Trigger**: 居服員或督導回報 `NO_SHOW` / `REFUSED` / `SAFETY_INCIDENT`。
+*   **Process (Logic)**:
+    1.  生成 `IncidentReport` (含時間、地點、類型、描述、證據連結選填)。
+    2.  若事件類型為高風險 (跌倒/暴力/性騷擾/疑似虐待) -> 觸發 Level 1 Escalation。
+    3.  若 30 分鐘內未被 `ACK` -> 觸發 Level 2 Escalation (含衛生局值勤窗口)。
+*   **Output**:
+    *   `IncidentTicket` (可追蹤)，並寫入 `AuditTrail`。
+
+## 3.6 生命週期與結案 Agent (Case Lifecycle Agent)
+
+### FR-CL-01: 個案生命週期狀態機 (Case Lifecycle State Machine)
+*   **Scope**: 定義個案從轉介到結案的狀態轉移。
+*   **States**: `NEW` -> `ASSESSED` -> `PLAN_APPROVED` -> `SERVICE_ACTIVE` -> `SERVICE_STABLE` -> `CLOSED`。
+*   **Rules**:
+    *   再入院/死亡/轉機構等事件可將狀態轉為 `CLOSED` (附 `CloseReason`)。
+    *   `CLOSED` 後 90 天內若再次啟動服務，需建立新 `CaseEpisode` 並保留關聯。
+
+### FR-CL-02: 共案交接摘要 (Shared-care Handoff Summary)
+*   **Trigger**: 服務結束或換人接案。
+*   **Process**:
+    *   從最近 N 次 `ServiceRecord` 擷取: 偏好、風險、禁忌、重要備註。
+    *   產生 `HandoffSummary` 給下一位服務人員確認。
+*   **Output**:
+    *   `HandoffSummary` (版本化)，並要求下一位服務者 `ACK`。

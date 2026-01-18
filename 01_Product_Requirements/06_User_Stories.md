@@ -56,3 +56,54 @@
 *   **Acceptance Criteria**:
     *   當 B 單位更新 `ServiceOrder` 狀態為 `EN_ROUTE` (路途中)，系統即時推播 LINE 訊息。
     *   訊息需包含服務人員照片與聯絡電話 (保護隱私前提下，提供轉接分機)。
+
+## 6.4 身分與導入 (Onboarding & Identity)
+
+**Story 6: B 單位快速導入 (Provider Onboarding)**
+*   **As a** B 單位督導
+*   **I want to** 用最少步驟完成單位資料、服務項目、服務區域、可接案時段與人員證照上傳
+*   **So that** 我能在 1 天內完成上線，開始接收媒合案件。
+*   **Acceptance Criteria**:
+    *   系統支援建立 `ProviderProfile` (基本資料、服務類別、服務區域、聯絡窗口)。
+    *   系統支援上傳並驗證居服員必要證照/技能標籤 (e.g., AA01/BA02)。
+    *   系統提供「試接案模式」：可接收案件但不計入績效，期限 14 天。
+
+**Story 7: 家屬低門檻開通 (Family Onboarding via LINE)**
+*   **As a** 家庭照顧者
+*   **I want to** 透過 LINE 一鍵綁定個案與主要聯絡人身分
+*   **So that** 我不需要下載 App 或註冊帳號，也能查詢進度與接收通知。
+*   **Acceptance Criteria**:
+    *   綁定需至少 1 個驗證因子：`CaseID + OTP` 或 `ROC_ID_Last4 + DOB`。
+    *   綁定成功後，家屬可檢視「案件狀態、預計服務時間、輔具配送狀態」。
+    *   支援新增/移除次要照顧者 (Secondary Contacts)，並保留稽核紀錄。
+
+## 6.5 例外與客服 (Exceptions & Support)
+
+**Story 8: 改期與取消 (Reschedule / Cancel)**
+*   **As a** 家庭照顧者
+*   **I want to** 在服務前可提出改期或取消申請，並清楚知道是否會影響媒合順位或產生費用
+*   **So that** 我能在病況變動或臨時外出時避免爽約與溝通成本。
+*   **Acceptance Criteria**:
+    *   服務前可在 LINE 送出 `RESCHEDULE_REQUEST` 或 `CANCEL_REQUEST`。
+    *   系統需顯示可選時段 (至少 3 個候選時段或「需人工協助」)。
+    *   取消/改期後，系統需通知 A 單位個管師與 B 單位督導。
+
+**Story 9: 爽約與安全事件通報 (No-show & Safety Incident)**
+*   **As a** 居服員
+*   **I want to** 在遇到案家爽約、拒絕服務、或現場安全事件 (跌倒/暴力/性騷擾) 時，一鍵回報並啟動後續處理
+*   **So that** 我能降低風險、保護自己，也讓後續銜接不中斷。
+*   **Acceptance Criteria**:
+    *   系統支援建立 `IncidentReport` (類型、時間、地點、描述、照片/錄音選填)。
+    *   重大事件需觸發升級：通知 B 單位督導 + A 單位個管師；必要時通知衛生局。
+    *   若 30 分鐘內未處理，系統觸發二次提醒。
+
+## 6.6 共案協作 (Shared Care / Handoff)
+
+**Story 10: 共案交接摘要 (Shared-care Handoff)**
+*   **As a** B 單位督導
+*   **I want to** 當同一個案由多位居服員輪流服務時，系統自動生成交接摘要 (偏好/注意事項/禁忌)
+*   **So that** 共案照顧的溝通成本下降，照顧一致性提高。
+*   **Acceptance Criteria**:
+    *   每次服務結束後，系統更新 `HandoffSummary`：本次觀察、風險標記、下次注意事項。
+    *   新接手的居服員在服務前需確認 (ack) 交接摘要。
+    *   若交接摘要含高風險標記 (如褥瘡/管路)，需強制提示並要求回報確認。

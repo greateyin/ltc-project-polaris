@@ -26,14 +26,17 @@
 
 *   **總額度**: 3 年內累計最高補助 **60,000 元**。
 *   **計算週期**: 採「滾動式 3 年」計算 (Rolling 3-Year Window)。
+*   **適用範疇**: 5 大類 (移位/移動/沐浴排泄/居家照顧床/安全看視)。
+*   **排除對象 (Exclusion)**:
+    *   全日住宿式機構之服務使用者。
+    *   團體家屋服務之服務使用者。
 *   **互斥規則 (Exclusion Rule)**:
     *   檢查 `HistoryClaims`。
     *   若過去 3 年內有 `Type = PURCHASE (購置)` 且 `Category` 屬於同類輔具 -> **不予補助** (Reject)。
-*   **租金分攤**:
-    *   依據 CMS 等級與福利身分別設有「最高補助比率」。
-    *   一般戶：補助租金 70% (最高不超過上限)。
-    *   中低收：補助租金 90%。
-    *   低收：補助租金 100%。
+*   **部分負擔 (Cost Sharing)**:
+    *   一般戶：自付 30%。
+    *   中低收：自付 10%。
+    *   低收：自付 0%。
 
 ## 7.2 媒合權重參數 (Matching Weights)
 
@@ -58,3 +61,25 @@ MatchScore = (Distance_W * Distance_S) +
 *   `Time = Night (20:00-08:00)`: +30 分。
 *   `Time = Holiday`: +30 分。
 *   `Location = Remote (偏鄉)`: +50 分 (政策保障)。
+
+## 7.3 服務例外規則 (Exceptions)
+
+*   **改期/取消窗口**:
+    *   若 `Now <= StartTime - 24h`：允許自助改期/取消。
+    *   若 `StartTime - 24h < Now <= StartTime - 2h`：允許改期，但需提示可能影響媒合與到位時效。
+    *   若 `Now > StartTime - 2h`：改期/取消需人工介入 (避免頻繁爽約導致供給端損失)。
+*   **爽約定義**:
+    *   服務人員抵達後等待超過 15 分鐘，且無法聯繫案家 -> 視為 `NO_SHOW`。
+*   **安全事件類型**:
+    *   `FALL`, `VIOLENCE`, `HARASSMENT`, `SUSPECTED_ABUSE`, `MEDICAL_EMERGENCY`。
+    *   高風險事件需觸發升級與稽核留存。
+
+## 7.4 排班與共案約束 (Scheduling & Shared Care Constraints)
+
+*   **時間窗 (Time Window)**:
+    *   每筆 `ServiceOrder` 必須包含可服務時間窗 `EarliestStart` / `LatestStart`。
+*   **路線成本 (Routing Cost)**:
+    *   若同一居服員同日多案，系統需將移動時間納入 `Time_S`，避免不可履約排程。
+*   **共案交接 (Handoff)**:
+    *   若同一個案在 7 天內由 >=3 位居服員服務，需強制產生 `HandoffSummary`。
+    *   下一位服務者需 `ACK` 後才可開始打卡。

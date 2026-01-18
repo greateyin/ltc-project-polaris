@@ -36,3 +36,26 @@
 *   **Coverage Gap Monitoring**: 系統需追蹤縣市覆蓋率差距與等待時間，避免資源集中導致服務斷點。
 *   **Info Accessibility**: 需提供低數位門檻管道 (LINE、語音) 讓家庭照顧者可查詢進度與權益。
 *   **Regional SLA**: 偏鄉或高缺口地區應納入差別化 SLA 與資源補強指標。
+
+## 4.4 同意與資料治理 (Consent & Data Governance)
+
+*   **Consent Lifecycle**: 系統需支援同意的建立、更新、撤回與稽核。
+*   **Minimum Necessary**: 預設僅揭露完成媒合/服務所需欄位；敏感欄位需明確授權。
+*   **Revocation Behavior**: 同意撤回後，需立刻停止後續資料分享；已產生之稽核紀錄不得刪除。
+*   **Delegated Access**: 家屬可授權次要照顧者查詢進度，但不得預設取得完整醫療資料。
+
+## 4.5 演算法公平與可稽核性 (Algorithmic Fairness & Auditability)
+
+*   **Fairness Metrics**:
+    *   需量測媒合結果對不同區域/不同規模 B 單位的分配差異 (e.g., win-rate、等待時間分布)。
+    *   需特別追蹤偏鄉/高缺口區域的服務到位時效。
+*   **Intervention Controls**:
+    *   支援政策加權參數 (如偏鄉保底加分) 並保留版本紀錄。
+    *   當偵測到分配失衡時，需有人工調參與回復機制。
+*   **Explainability**:
+    *   對個管師提供 Top-N 媒合理由 (距離/技能/時間/加權) 的可讀摘要。
+
+## 4.6 營運可用性 (Operational Readiness)
+
+*   **Runbook**: 需定義關鍵事件 (改期、取消、爽約、安全事件) 的處理流程與責任歸屬。
+*   **Support SLA**: 針對高風險事件通報，需定義 30 分鐘內回應之值勤機制。
