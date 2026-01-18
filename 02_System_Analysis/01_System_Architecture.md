@@ -47,10 +47,13 @@ graph TD
         Ag_Resource["Resource Agent (Go)\n- Logic: Subsidy Calc\n- Logic: Inventory Check"]
         Ag_Notify["Notification Agent (Node.js)\n- Channel: Line/SMS/Email"]
         Ag_SLA["SLA Monitor Agent (Go)\n- Func: Time-Series Tracking"]
+        Ag_Onboard["Onboarding Agent (Node.js)\n- ProviderProfile Setup\n- Family Link via LINE"]
+        Ag_Exception["Exception & Escalation Agent (Go)\n- Reschedule/Cancel\n- Incident Ticketing"]
+        Ag_Lifecycle["Case Lifecycle Agent (Go)\n- CaseEpisode\n- Handoff Summary"]
     end
 
     subgraph "Data Persistence Layer (資料層)"
-        DB_Core[("PostgreSQL 16 - Sharded\n- Cases, Orders, Audit")]
+        DB_Core[("PostgreSQL 16 - Sharded\n- Cases, Orders, Audit, Consent")]
         DB_Vector[("Qdrant\n- Provider Profiles (Embeddings)")]
         Cache[("Redis Cluster\n- Session, Hot Inventory")]
         Obj_Store[("MinIO/S3\n- Medical Images, Signatures")]
@@ -65,14 +68,21 @@ graph TD
 
     Event_Bus --> Ag_Demand
     Event_Bus --> Ag_Match
-    Event_Bus --> Ag_Resource
-    Event_Bus --> Ag_Notify
-    Event_Bus --> Ag_SLA
+     Event_Bus --> Ag_Resource
+     Event_Bus --> Ag_Notify
+     Event_Bus --> Ag_SLA
+     Event_Bus --> Ag_Onboard
+     Event_Bus --> Ag_Exception
+     Event_Bus --> Ag_Lifecycle
 
-    Ag_Demand --> DB_Core
-    Ag_Match --> DB_Vector
-    Ag_Resource --> DB_Core
-    Ag_Match --> Cache
+     Ag_Demand --> DB_Core
+     Ag_Match --> DB_Vector
+     Ag_Resource --> DB_Core
+     Ag_Match --> Cache
+     Ag_Onboard --> DB_Core
+     Ag_Exception --> DB_Core
+     Ag_Lifecycle --> DB_Core
+
 ```
 
 ---

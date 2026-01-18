@@ -71,6 +71,148 @@ CREATE TABLE core.match_requests (
 CREATE INDEX idx_match_geo ON core.match_requests USING GIST (target_geo);
 ```
 
+#### Table: `providers` (服務提供者主檔)
+用於 B 單位導入、服務區域、聯絡窗口與合約狀態管理。
+
+```sql
+CREATE TABLE core.providers (
+    provider_uuid     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    org_code          VARCHAR(32) UNIQUE, -- 機構代碼 (若有)
+    name              TEXT NOT NULL,
+    contact_name      TEXT,
+    contact_phone     TEXT,
+    service_categories TEXT[] NOT NULL, -- e.g., ['BA', 'DA', 'EF_R']
+    service_area      GEOMETRY(POLYGON, 4326),
+    status            VARCHAR(20) DEFAULT 'ACTIVE', -- ACTIVE, SUSPENDED, OFFBOARDED
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_providers_area ON core.providers USING GIST (service_area);
+```
+
+#### Table: `provider_staff` (服務人員與證照)
+用於排班/技能匹配，並支援證照有效性與撤銷。
+
+```sql
+CREATE TABLE core.provider_staff (
+    staff_uuid        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provider_uuid     UUID NOT NULL REFERENCES core.providers(provider_uuid),
+    name              TEXT NOT NULL,
+    license_codes     TEXT[] NOT NULL, -- e.g., ['AA01', 'BA02']
+    license_expiry    DATE,
+    status            VARCHAR(20) DEFAULT 'ACTIVE',
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_staff_provider ON core.provider_staff(provider_uuid);
+```
+
+#### Table: `consent_records` (同意紀錄)
+以可稽核方式保存個案同意 (範圍/期限/撤回)；撤回不刪除，僅標記失效。
+
+```sql
+CREATE TABLE core.consent_records (
+    consent_uuid      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_uuid         UUID NOT NULL REFERENCES core.cases(case_uuid),
+    scope             JSONB NOT NULL, -- e.g., {"share_fhir": true, "share_with": ["PROVIDER"], "fields": [...]}
+    valid_from        TIMESTAMPTZ NOT NULL,
+    valid_until       TIMESTAMPTZ,
+    revoked_at        TIMESTAMPTZ,
+    revoked_reason    TEXT,
+    created_by        UUID,
+    created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_consent_case ON core.consent_records(case_uuid);
+```
+
+#### Table: `case_episodes` (個案服務週期)
+支援同一個案多次啟動/結案 (例如再入院後 90 天內重啟)。
+
+```sql
+CREATE TABLE core.case_episodes (
+    episode_uuid      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_uuid         UUID NOT NULL REFERENCES core.cases(case_uuid),
+    status            VARCHAR(20) NOT NULL, -- NEW/ACTIVE/CLOSED
+    open_reason       TEXT,
+    close_reason      TEXT,
+    opened_at         TIMESTAMPTZ DEFAULT NOW(),
+    closed_at         TIMESTAMPTZ
+);
+
+CREATE INDEX idx_episode_case ON core.case_episodes(case_uuid);
+```
+
+#### Table: `incident_reports` (事件通報)
+記錄爽約/拒絕服務/安全事件等現場狀況，並可附證據連結。
+
+```sql
+CREATE TABLE core.incident_reports (
+    report_uuid       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_uuid         UUID NOT NULL REFERENCES core.cases(case_uuid),
+    service_order_uuid UUID,
+    report_type       VARCHAR(30) NOT NULL, -- NO_SHOW, REFUSED, SAFETY_INCIDENT
+    severity          VARCHAR(10) DEFAULT 'LOW', -- LOW, MEDIUM, HIGH
+    description       TEXT,
+    evidence_urls     TEXT[],
+    occurred_at       TIMESTAMPTZ NOT NULL,
+    created_by        UUID,
+    created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_incident_case ON core.incident_reports(case_uuid);
+```
+
+#### Table: `incident_tickets` (事件工單)
+用於追蹤處理狀態與升級 (ACK/ESCALATED)。
+
+```sql
+CREATE TABLE core.incident_tickets (
+    ticket_uuid       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    report_uuid       UUID REFERENCES core.incident_reports(report_uuid),
+    ticket_type       VARCHAR(30) NOT NULL, -- RESCHEDULE, CANCEL, INCIDENT
+    status            VARCHAR(20) DEFAULT 'OPEN', -- OPEN, ACKED, ESCALATED, CLOSED
+    assigned_to       UUID,
+    ack_deadline      TIMESTAMPTZ,
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_ticket_status ON core.incident_tickets(status);
+```
+
+#### Table: `handoff_summaries` (共案交接摘要)
+以版本化方式保存交接摘要；每次服務結束更新版本。
+
+```sql
+CREATE TABLE core.handoff_summaries (
+    summary_uuid      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_uuid         UUID NOT NULL REFERENCES core.cases(case_uuid),
+    version           INT NOT NULL DEFAULT 1,
+    summary           JSONB NOT NULL, -- preferences, risks, notes
+    created_at        TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (case_uuid, version)
+);
+
+CREATE INDEX idx_handoff_case ON core.handoff_summaries(case_uuid);
+```
+
+#### Table: `handoff_acks` (交接確認)
+新接手服務者需 ACK 才能開始打卡。
+
+```sql
+CREATE TABLE core.handoff_acks (
+    ack_uuid          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    summary_uuid      UUID NOT NULL REFERENCES core.handoff_summaries(summary_uuid),
+    staff_uuid        UUID NOT NULL,
+    acked_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_handoff_ack_summary ON core.handoff_acks(summary_uuid);
+```
+
 #### Table: `metrics_coverage_gap` (覆蓋率與等待時間)
 用於政策 KPI 追蹤，避免區域資源缺口。
 

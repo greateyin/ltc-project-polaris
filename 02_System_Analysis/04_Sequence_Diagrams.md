@@ -125,3 +125,111 @@ sequenceDiagram
     Auth->>App: Access Token + Refresh Token
     App->>User: Login Success (Dashboard)
 ```
+
+---
+
+## SEQ-04: 改期/取消與升級通報 (Reschedule/Cancel & Escalation)
+
+**情境**: 家屬在 LINE 上提出改期；若 B 單位未在 30 分鐘內確認，系統升級通知衛生局值勤窗口。
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Fam as Family (LINE)
+    participant Line as Line Bot Platform
+    participant GW as API Gateway
+    participant Orch as Orchestrator (Temporal)
+    participant Ag_EE as Exception & Escalation Agent
+    participant DB as Core DB
+    participant Prov as Provider Supervisor App
+    participant Gov as Health Bureau On-Call
+
+    Fam->>Line: "改期" (RESCHEDULE_REQUEST)
+    Line->>GW: POST /api/v1/service-orders/{id}/reschedule
+    GW->>Orch: Signal Workflow (ServiceOrderSaga)
+
+    Orch->>Ag_EE: Validate window & propose 3 slots
+    Ag_EE->>DB: INSERT incident_tickets (type=RESCHEDULE)
+    Ag_EE-->>Orch: ProposedSlots
+
+    Orch->>Prov: Notify (need confirm)
+    note right of Orch: Timer starts (30 minutes)
+
+    alt Provider confirmed within 30m
+        Prov-->>Orch: Confirm Slot
+        Orch->>DB: UPDATE service_orders (status=RESCHEDULED)
+        Orch->>Line: Push confirmation to family
+    else No response in 30m
+        Orch->>Gov: Escalation Notify (Level 2)
+        Orch->>DB: UPDATE incident_tickets (status=ESCALATED)
+        Orch->>Line: Push "已升級處理" to family
+    end
+```
+
+---
+
+## SEQ-05: 爽約/安全事件通報與稽核 (No-show & Safety Incident)
+
+**情境**: 居服員到場遇到案家爽約或安全事件，系統建立 IncidentReport 並啟動升級與稽核留存。
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant CW as Care Worker App
+    participant GW as API Gateway
+    participant Orch as Orchestrator (Temporal)
+    participant Ag_EE as Exception & Escalation Agent
+    participant DB as Core DB
+    participant S3 as WORM Audit Store
+    participant CM as Care Manager Portal
+
+    CW->>GW: POST /api/v1/incidents (NO_SHOW/SAFETY_INCIDENT)
+    GW->>Orch: Start Workflow (IncidentWorkflow)
+
+    Orch->>Ag_EE: Classify severity
+    Ag_EE->>DB: INSERT incident_reports
+    Ag_EE->>DB: INSERT incident_tickets (status=OPEN)
+    Ag_EE->>S3: Append audit event (Object Lock)
+
+    Orch->>CM: Notify incident (requires ACK)
+    alt ACK within 30m
+        CM-->>Orch: ACK
+        Orch->>DB: UPDATE incident_tickets (status=ACKED)
+    else No ACK
+        Orch->>DB: UPDATE incident_tickets (status=ESCALATED)
+    end
+```
+
+---
+
+## SEQ-06: 共案交接摘要產生與確認 (Shared-care Handoff)
+
+**情境**: 同一個案在 7 天內由多位居服員服務，系統在每次服務結束後更新交接摘要；新接手人員需 ACK。
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant CW1 as Care Worker A
+    participant CW2 as Care Worker B
+    participant GW as API Gateway
+    participant Orch as Orchestrator (Temporal)
+    participant Ag_CL as Case Lifecycle Agent
+    participant DB as Core DB
+
+    CW1->>GW: POST /api/v1/service-orders/{id}/checkout
+    GW->>Orch: Signal (ServiceOrderCompleted)
+
+    Orch->>Ag_CL: Build/Update HandoffSummary
+    Ag_CL->>DB: UPSERT handoff_summaries (version++)
+    Ag_CL-->>Orch: SummaryId
+
+    Orch->>GW: Require ACK before next check-in
+
+    CW2->>GW: GET /api/v1/cases/{id}/handoff-summary
+    CW2->>GW: POST /api/v1/cases/{id}/handoff-ack
+    GW->>Ag_CL: Record ACK
+    Ag_CL->>DB: INSERT handoff_acks
+```
