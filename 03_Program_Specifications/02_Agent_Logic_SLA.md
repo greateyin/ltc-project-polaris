@@ -135,3 +135,30 @@ func (e *Engine) CheckRule(ctx context.Context, claim ClaimRequest) (Result, err
 *   **Coverage Gap**: 依 `region_code` 計算覆蓋率與等待時間，並寫入監測表。
 *   **Workforce Load**: 監控個管/照專平均案量與超載比例，異常時通知衛生局。
 *   **Signals**: 由事件流或 CMS 統計匯入，採月彙整並保留快照。
+
+## 2.6 Agent Communication Protocol (ACP)
+
+Agent 間通訊遵循 **Semantic Routing** 與 **ACL** 管控。
+
+*   **Service Mesh**: 所有 Agent 部署於 Service Mesh (Istio) 內，互叫走 gRPC。
+*   **Access Control List (ACL)**:
+    *   `DemandAgent` 僅能呼叫 `ResourceAgent.CheckSubsidy`。
+    *   `MatchAgent` 僅能讀取 `ProviderService` (Read-Only)，不可修改資料。
+*   **Fallback Strategy**:
+    *   若 Primary Agent (e.g., AI Matching) 響應逾時 (>3s)，自動降級為 Rule-Based Matching (距離優先)。
+
+## 2.7 Prompt Management (LLM Ops)
+
+針對依賴 LLM 的 `DemandAgent` (NLP 解析)，需實施 Prompt Engineering 治理。
+
+*   **Template Versioning**: Prompt 模板儲存於 Git，隨版號發布。
+    *   `prompts/clinical-note-parser/v2.1.jinja2`
+*   **Few-Shot Examples**: 每個 Prompt 必須包含至少 3 個 Golden Case (經人工標註的正確範例) 以穩定輸出。
+*   **Output Validation**: LLM 輸出必須經過 **Pydantic Guardrails** 驗證 JSON Schema，失敗則觸發 Retry 或人工審核。
+    ```python
+    # Example Guard
+    class ClinicalAssessment(BaseModel):
+        cms_level: int = Field(ge=1, le=8)
+        has_dementia: bool
+        urgent_needs: List[str]
+    ```

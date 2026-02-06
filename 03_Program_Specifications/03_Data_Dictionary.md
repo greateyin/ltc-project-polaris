@@ -14,11 +14,13 @@
 | `ACTIVE` | 服務中 (已簽約) | `CLOSED`, `SUSPENDED` |
 
 ### `ServiceCategory`
-| Code | Name | FHIR Coding (TW Core) |
+| Code | Name | FHIR Coding (TW Core v1.0.0) |
 | :--- | :--- | :--- |
-| `BA` | 居家照顧 | `https://pre-code.gov.tw/CodeSystem/LTC-Service-Type#BA` |
-| `DA` | 日間照顧 | `https://pre-code.gov.tw/CodeSystem/LTC-Service-Type#DA` |
-| `EF_R` | 輔具租賃 | `https://pre-code.gov.tw/CodeSystem/LTC-Service-Type#EF-R` |
+| `BA` | 居家照顧 | `https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/lic-service-type-codes` (Example) |
+| `DA` | 日間照顧 | `https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/lic-service-type-codes` (Example) |
+| `EF_R` | 輔具租賃 | `https://twcore.mohw.gov.tw/ig/twcore/CodeSystem/lic-service-type-codes` (Example) |
+
+*Note: The actual URL for TW Core CodeSystem should be verified against the official IG v1.0.0 documentation.*
 
 ### `MetricType`
 | Code | Description |

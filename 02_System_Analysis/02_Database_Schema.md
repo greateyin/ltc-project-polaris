@@ -260,3 +260,25 @@ CREATE TABLE analytics.metrics_workforce_load (
 | `inv:device:{provider_id}:{sku}` | String (Int) | 5m | 供應商輔具即時庫存 (Real-time Inventory) |
 | `rate:ip:{ip_addr}` | Counter | 1m | API Rate Limiting (防禦 DDoS) |
 | `geo:providers:{category}` | GeoSet | - | 服務單位位置索引 (加速半徑搜尋) |
+
+---
+
+## 2.4 FHIR Storage Strategy (Hybrid Pattern)
+
+為平衡 FHIR 標準的靈活性與 SQL 查詢的高效能，採用 **Hybrid Storage Model**。
+
+### 2.4.1 Storage Rules
+1.  **Raw Data**: 完整的 FHIR Resource (JSON) 儲存於 `fhir_data` (JSONB) 欄位，確保 100% 原始資料保真度。
+2.  **Search Params**: 頻繁查詢欄位 (e.g., `identifier`, `gender`, `birthDate`) **必須** 提取至 Table 的獨立 Column，並建立 B-Tree 索引。
+3.  **Complex Query**: 針對 JSONB 內部的巢狀查詢 (e.g., `Patient.contact.telecom`), 使用 **GIN Index** (`jsonb_path_ops`)。
+
+### 2.4.2 Indexing Example
+```sql
+-- 1. 針對任意 JSON 路徑的高效查詢
+CREATE INDEX idx_cases_fhir_gin ON core.cases USING GIN (fhir_data jsonb_path_ops);
+
+-- 2. 針對特定 FHIR 路徑的提取索引 (Functional Index)
+-- 查詢: WHERE fhir_data @> '{"contact": [{"relationship": [{"coding": [{"code": "C"}]}]}]}'
+CREATE INDEX idx_cases_contact_rel ON core.cases 
+USING GIN ((fhir_data -> 'contact') jsonb_path_ops);
+```

@@ -35,7 +35,7 @@
 ## 3.3 合規性驗證 (Compliance Validation)
 
 ### 3.3.1 FHIR TW Core IG 合規
-*   **Validator Service**: 部署官方 HAPI FHIR Validator 實例。
+*   **Validator Service**: 部署官方 HAPI FHIR Validator 實例，參照 **TW Core IG v1.0.0 (2025-12)** 標準。
 *   **Validation Pipeline**:
     *   Ingress: 來自 HIS 的 Bundle 進入 Inbound Gateway 時，同步呼叫 Validator。
     *   Logic: 若驗證失敗 (e.g., 缺少 Identifier System)，回傳 `400 Bad Request` + `OperationOutcome` 錯誤詳情。

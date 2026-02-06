@@ -123,3 +123,37 @@ graph TD
 *   **Replay & Idempotency**: 消費者必須設計為可重放 (idempotent)；事件處理需有去重鍵。
 *   **Outbox Pattern**: 服務寫入 DB 與發送事件採用 Outbox，避免雙寫不一致。
 *   **Saga Boundary**: 事件發佈與補償交易的邊界需明確標註於 Workflow 定義中。
+
+---
+
+## 1.6 Event Bus Topology & Schema
+
+使用 **CloudEvents v1.0** 作為標準封包格式。
+
+### 1.6.1 Topic Taxonomy
+命名慣例: `ltc.{domain}.{entity}.{action}.v{version}`
+
+| Topic Name | Partition Key | Retention | Description |
+| :--- | :--- | :--- | :--- |
+| `ltc.case.lifecycle.events.v1` | `case_uuid` | 10 Years (Compact) | 個案全生命週期事件 (Created, Assessed, Closed) |
+| `ltc.provider.inventory.updates.v1` | `provider_uuid` | 7 Days | 輔具庫存變動與排班表更新 |
+| `ltc.match.request.events.v1` | `region_code` | 30 Days | 媒合請求與結果 (用於監測覆蓋率) |
+| `ltc.sys.audit.logs.v1` | `correlation_id` | 7 Years (S3 Offload) | 系統稽核日誌 (不可變) |
+
+### 1.6.2 Event Payload Example (CloudEvents)
+```json
+{
+  "specversion": "1.0",
+  "type": "ltc.case.assessed",
+  "source": "/agent/demand",
+  "subject": "case_5566",
+  "id": "evt_998877",
+  "time": "2026-06-01T10:00:00Z",
+  "datacontenttype": "application/json",
+  "data": {
+    "cms_level": 7,
+    "welfare_status": "LOW_INCOME",
+    "assessed_by": "agent_demand_v2"
+  }
+}
+```

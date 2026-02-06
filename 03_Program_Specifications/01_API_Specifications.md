@@ -5,6 +5,7 @@
     *   External (Web/App/Partner) -> **REST over HTTP/2**
     *   Internal (Agent-to-Agent) -> **gRPC (Protobuf)**
 *   **Auth**: JWT (RS256) in `Authorization` header.
+*   **Idempotency**: 寫入操作 (POST/PUT/PATCH) 必須帶 `Idempotency-Key` header (UUID v4)。
 *   **Rate Limit**: 基於 Redis Token Bucket (X-RateLimit-Limit).
 *   **Region Context**: 涉及公平性監測的 API 必須帶 `region_code` (或能由個案/機構推導)。
 
@@ -213,4 +214,32 @@ message GrantResponse {
   double self_pay_amount = 3;
   string rejection_reason = 4; // if not eligible
 }
+
+---
+
+## 1.4 Error Handling Standard
+
+採用 **RFC 7807 (Problem Details for HTTP APIs)** 標準格式。
+
+### 1.4.1 Response Format
+```json
+{
+  "type": "https://ltc.gov.tw/probs/out-of-stock",
+  "title": "Device Out of Stock",
+  "status": 422,
+  "detail": "The requested device 'LIFT_01' is not available in the provider's inventory.",
+  "instance": "/api/v1/orders/ord_12345/items",
+  "trace_id": "req_889900aabb"
+}
+```
+
+### 1.4.2 Common Error Codes
+| HTTP Status | Internal Code | Description | Action |
+| :--- | :--- | :--- | :--- |
+| **400** | `E-001` | Validation Error (Schema mismatch) | Check payload format |
+| **401** | `E-002` | Authentication Failed (Token expired) | Refresh token |
+| **403** | `E-003` | Permission Denied (Scope mismatch) | Request access |
+| **409** | `E-004` | Conflict (Idempotency key reused) | Do not retry |
+| **429** | `E-005` | Rate Limit Exceeded | Retry after `Retry-After` |
+| **500** | `E-999` | Internal Server Error | Contact support w/ trace_id |
 ```
